@@ -57,7 +57,6 @@ public class NodeManager {
       }
       if (curSource != curDest) curSource.addEdge(curDest);
    }
-   print("NUM NODES: " + nodes.size() + "\n");
    setMinMaxEdge();
  }
  
@@ -92,7 +91,6 @@ public class NodeManager {
    }
    boolean holding = initialize_nodes(pressed, dragged);
    if (first || holding || dim_changed || energy > 0) {
-     print("CALLED SET FORCES\n");
      setForces();
    }
    drawEdges();

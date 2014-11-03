@@ -66,7 +66,7 @@ class Controller {
     print("CALLED SET FILTER CATEGORICAL..\n");
     String cur_spec;
     Firewall cur_data;
-    new_selected = new ArrayList<Firewall>();
+    ArrayList<Firewall> new_selected = new ArrayList<Firewall>();
     ArrayList<String> operationList;
     ArrayList<String> syslogList;
     ArrayList<String> protocolList;

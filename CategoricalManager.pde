@@ -80,7 +80,7 @@ public class CategoricalView {
       controller.setSelectedCategorical(selected);
       selecting = (selectionMode == 2);
     } else if (mode == 2 && selectionMode == 2 && selection_made) {
-      controller.setFilterCategorical(selected);
+      controller.setFilterCategorical(selected, canvas.selections.size() - 1);
     }
   }
 

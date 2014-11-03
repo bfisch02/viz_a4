@@ -7,7 +7,11 @@ public class CategoricalView {
   HashMap<String,Integer> syslogStat;
   IntList colors;
   StringList mouseOverBar;
-
+  HashMap<String, ArrayList<String>> selected;
+  int num_selected;
+  String hover_name;
+  String hover_value;
+  boolean hovering;
 
   public CategoricalView (Controller controller, Canvas canvas) {
     this.canvas = canvas;
@@ -21,6 +25,10 @@ public class CategoricalView {
     this.mouseOverBar = new StringList();
     this.mouseOverBar.append("null");
     this.mouseOverBar.append("null");
+    this.selected = new HashMap<String, ArrayList<String>>();
+    this.hover_name = "";
+    this.hover_value = "";
+    this.hovering = false;
   }
 
   void useSelected()
@@ -38,6 +46,7 @@ public class CategoricalView {
   }
 
   void update() {
+    this.hovering = false;
     this.mouseOverBar.set(0,null);
     this.mouseOverBar.set(1,null);
     pushMatrix();
@@ -46,6 +55,7 @@ public class CategoricalView {
     stroke(0);
     //rect(0, 0, this.canvas.w, this.canvas.h);
     fill(10);
+    selected = new HashMap<String, ArrayList<String>>();
     translate(this.canvas.w*0.05, 0);
     drawStat(operationStat, this.canvas.w*0.3, this.canvas.h, "Operation");
     translate(this.canvas.w*0.3, 0);
@@ -53,8 +63,14 @@ public class CategoricalView {
     translate(this.canvas.w*0.3, 0);
     drawStat(protocolStat, this.canvas.w*0.3, this.canvas.h, "Protocol");
 
-    println("this.mouseOverBar: "+this.mouseOverBar);
+    //println("this.mouseOverBar: "+this.mouseOverBar);
     popMatrix();
+    if (mode == 0 && !this.hovering && hover_name != "") {
+       hover_name = "";
+       hover_value = "";
+       print("Resetting\n");
+       controller.setSelectedCategorical(selected);
+    }
   }
 
  void drawSelections()
@@ -87,15 +103,28 @@ public class CategoricalView {
       fill(c);
       float h_part = h_bar*(Integer)entry.getValue()/sum;
 
-      rect(0, 0, w_bar, h_part);
       float tmpX = mouseX - screenX(0, 0);
       float tmpY = mouseY - screenY(0, 0);
       if (tmpX >= 0 && tmpX <= w_bar &&
           tmpY >= 0 && tmpY <= h_part) {
         this.mouseOverBar.set(0,title);
         this.mouseOverBar.set(1,(String)entry.getKey());
+        if (mode == 0) {
+          fill(255, 255, 0);
+          this.hovering = true;
+          ArrayList<String> l = new ArrayList<String>();
+          l.add((String)entry.getKey());
+          selected.put(title, l);
+          if (title != hover_name || (String)entry.getKey() != hover_value) {
+            print("New selection!\n");
+            hover_name = title;
+            hover_value = (String)entry.getKey();
+            controller.setSelectedCategorical(selected);
+          }
+        }
+        
       }
-
+      rect(0, 0, w_bar, h_part);
       fill(255);
       text((String)entry.getKey(), w_bar/2, min(12.0, h_part));
 

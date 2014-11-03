@@ -56,7 +56,9 @@ public class NodeManager {
         nodes.add(curDest);
         nodeMap.put(curDest.getId(), curDest);
       }
-      if (curSource != curDest) curSource.addEdge(curDest);
+      if (curSource != curDest) {
+        curSource.addEdge(curDest, cur);
+      }
    }
    setMinMaxEdge();
  }
@@ -219,6 +221,37 @@ public class NodeManager {
    float forceY = force * diff_y / hyp;
    a.applyForce(-1 * forceX, -1 * forceY);
    b.applyForce(forceX, forceY);
+ }
+ 
+ void highlightSelectedEdges()
+ {
+   Node curNode;
+   Edge curEdge;
+   Firewall curData;
+   unhighlightEdges();
+   for (int i = 0; i < controller.getSelectedData().size(); i++) {
+     curData = controller.getSelectedData().get(i);
+     curNode = nodeMap.get(curData.sourceIP);
+     curEdge = curNode.edgeMap.get(curData.destIP);
+     print("SOURCEIP: " + curData.sourceIP + ", DESTIP: " + curData.destIP + "\n");
+     if (curEdge == null) print("WHY IS THIS NULL\n");
+     if (curEdge.data.contains(curData)) {
+       curEdge.selected = true; 
+     }
+   }
+ }
+ 
+ void unhighlightEdges()
+ {
+   Node curNode;
+   Edge curEdge;
+   for (int i = 0; i < nodes.size(); i++) {
+     curNode = nodes.get(i);
+     for (int j = 0; j < curNode.edges.size(); j++) {
+       curEdge = curNode.edges.get(j);
+       curEdge.selected = false;
+     }
+   } 
  }
  
  void drawEdges()

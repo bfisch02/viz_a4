@@ -36,15 +36,16 @@ public class Node {
    this.selected = false;
  }
  
- void addEdge(Node dest)
+ void addEdge(Node dest, Firewall data)
  {
    Edge curEdge = edgeMap.get(dest.getId());
    if (curEdge == null) {
-     curEdge = new Edge(this, dest, c);
+     curEdge = new Edge(this, dest, c, data);
      edgeMap.put(dest.getId(), curEdge);
+     print("destID: " + dest.getId() + "\n");
      edges.add(curEdge);
    } else {
-     curEdge.incrementThickness(); 
+     curEdge.addNew(data); 
    }
  }
  

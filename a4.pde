@@ -19,6 +19,7 @@ float selectionW;
 float selectionH;
 int selectionMode = -1;
 boolean mousedown = false;
+CategoricalView categoricalView;
 
 void setup()
 {
@@ -31,9 +32,11 @@ void setup()
    settings_canvas = new Canvas(W_SPLIT * width, 0, (1 - W_SPLIT) * width, H_SPLIT1 * height);
    settings_button = new Canvas(settings_canvas.x + settings_canvas.w / 4, settings_canvas.y + settings_canvas.h / 4,
                                 settings_canvas.w / 2, settings_canvas.h / 2);
-   temporal_canvas = new Canvas(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
-   categorical_canvas = new Canvas(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
+   categorical_canvas = new Canvas(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
+   temporal_canvas = new Canvas(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
    network_model = new NodeManager(controller, network_canvas);
+   categoricalView = new CategoricalView(controller, categorical_canvas);
+
 }
 
 void draw()
@@ -45,7 +48,9 @@ void draw()
   network_model.simulate(false, false);
   settings_canvas.drawRect(240);
   temporal_canvas.drawRect(230);
-  categorical_canvas.drawRect(220);
+  // categorical_canvas.drawRect(220);
+  categoricalView.update();
+  // categorical_canvas.drawRect(150);
   drawMode();
 }
 
@@ -55,8 +60,8 @@ void updateCanvases()
   settings_canvas.update(W_SPLIT * width, 0, (1 - W_SPLIT) * width, H_SPLIT1 * height);
   settings_button.update(settings_canvas.x + settings_canvas.w / 4, settings_canvas.y + settings_canvas.h / 4,
                          settings_canvas.w / 2, settings_canvas.h / 2);
-  temporal_canvas.update(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
-  categorical_canvas.update(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
+  categorical_canvas.update(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
+  temporal_canvas.update(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
 }
 
 void drawMode()

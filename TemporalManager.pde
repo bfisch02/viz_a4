@@ -127,27 +127,27 @@ public class TemporalManager {
  }
 
 void drawRects()
- {
-   int snum=0;
-   int tnum=0;
+{
+  int snum=SP.size();
+  int tnum=0;
   for(String s: SP){
-    snum+=1;
-    tnum = 0;
-   for(String t: time){
-     tnum+=1;
-   RectNode temp = RectMap.get(s+","+t);
-  if(temp!= null){
-   temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);   
-  }
-  else{
-    temp = new RectNode(s,t,c);
-    temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);
-   }
+    snum-=1;
+    tnum = time.size();
+    for(String t: time){
+      tnum-=1;
+      RectNode temp = RectMap.get(s+","+t);
+      if(temp!= null){
+        temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);   
+      }
+    else{
+      temp = new RectNode(s,t,c);
+      temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);
+    }
   
   } 
 
  }
- }
+}
 int get_num_SP(){
   return num_SP;
 }
@@ -157,18 +157,15 @@ int get_num_time(){
 }
 
 void drawTable(){
-  print("height...");
-  print(c.h);
-  print("width....");
-  print(c.w);
+
    int i=0;
    for(String s: SP){
 //   for(int i=0; i<num_SP; i++){
    fill(220,220,220);
-   rect(c.x, c.y + 30+(i*10), 50,10 ); // 40 to 50
+   rect(c.x, c.y + c.h / 15 +(i*c.h / 27), c.w / 20, c.h / 27); // 40 to 50
    fill(0,0,0);
-   textSize(7);
-   text(s,c.x+25,c.y+30+((i+1)*10));
+   textSize(c.w / 150);
+   text(s,c.x + c.w/40,c.y+c.h / 15 +((i+1)*c.h / 27 - 3));
    i++;
    }
    i=0;
@@ -176,10 +173,10 @@ void drawTable(){
 for(String t: time){
 //   for(int i=0; i<num_time; i++){
      fill(220,220,220);
-     rect(c.x+50+(i*40),c.y+30+(10*num_SP),40,10);// 30 to 40
+     rect(c.x+ c.w / 20 + i*(c.w / 34),c.y+c.h / 15+((num_SP) * c.h / 27),c.w / 34, c.h / 27);// 30 to 40
      fill(0,0,0);
-     textSize(7);
-     text(t,c.x+68+(i*40),c.y+258);
+     textSize(c.w / 150);
+     text(t,c.x+ c.w / 20 + i*(c.w / 34) + c.w/68, c.y+c.h / 15+((num_SP) * c.h / 27 + c.h / 54 + 2));
      
      
      i++;

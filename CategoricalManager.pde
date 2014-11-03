@@ -96,6 +96,7 @@ public class CategoricalView {
     translate(w/5, h/10);
     fill(0);
     textAlign(CENTER);
+    textSize(10);
     text(title, w*3/10, -5);
     fill(200,100,0);
     float w_bar = w*3/5;

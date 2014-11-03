@@ -52,7 +52,19 @@ void drawRect(int s,int t, int num_SP, int num_time, int max){
  float g_val = 255 - g_sub;
   
  fill(r_val,g_val,255);
-  rect(c.x+10+(t*40),c.y+20+(s*10),40,10);
+  //rect(c.x+10+(t*40),c.y+20+(s*10),40,10);
+  
+  //rect(c.x, c.y + c.h / 15 +(i*c.h / 27), c.w / 20, c.h / 27); // 40 to 50
+  float my_x = c.x+ c.w / 20 + t*(c.w / 34);
+  float my_y = c.y+c.h / 15+((num_SP - 1 - s) * c.h / 27);
+  float my_w = c.w / 34;
+  float my_h = c.h / 27;
+  rect(my_x, my_y, my_w, my_h);// 30 to 40
+  if (mouseX > my_x && mouseX < my_x + my_w && mouseY > my_y && mouseY < my_y + my_h) {
+    print("s, t: " + s + ", " + t + "\n"); 
+  }
+  
+  
   //print("hey");
     
  }

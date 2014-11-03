@@ -24,7 +24,7 @@ public class NodeManager {
    this.c = c;
    this.cK = 700; // Definitely change this
    this.dampFactor = .95;
-   this.wallFactor = .025;
+   this.wallFactor = .03;
    this.t = .12;
    this.first = true;
    this.threshold = .5;

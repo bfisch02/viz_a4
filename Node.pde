@@ -54,7 +54,7 @@ public class Node {
    if (mode == 0 && mouseOver()) {
      fill(255, 255, 0);
      selected = true;
-   } else if (mode != 1 && c.selections.size() > 0 && checkSelections()) {
+   } else if (mode != 0 && c.selections.size() > 0 && checkSelections()) {
      fill(255, 255, 0);
      selected = true;
    } else {

@@ -15,6 +15,14 @@ public class Canvas {
   
   void addSelection(float x, float y, float w, float h)
   {
+    if (w < 0) {
+      x += w;
+      w *= -1; 
+    }
+    if (h < 0) {
+      y += h;
+      h *= -1; 
+    }
     selections.add(new Canvas(x, y, w, h));
     print("ADDED SELECTION\n");
   }

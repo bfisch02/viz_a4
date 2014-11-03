@@ -31,7 +31,7 @@ public class Edge {
    fill(0);
    float percent = (float)(this.thickness - thickMin) / (float)(thickMax - thickMin);
    
-   strokeWeight(percent * 5);
+   strokeWeight(percent * 10);
    stroke(0, 255, 0);
    if (selected) stroke(255, 255, 0);
    curve(b.x, b.y, a.x, a.y, b.x, b.y, a.x, a.y); 

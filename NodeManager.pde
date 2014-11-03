@@ -113,12 +113,27 @@ public class NodeManager {
        num_selected = selected.size();
        controller.setSelectedNetwork(selected);
     }
-   } else if (mode == 2) {
-     
+   } else if (mode == 2 && selectionMode == 0 && selection_made) {
+     selected = getSelected(c.selections.size() - 1);
+     controller.setFilterNetwork(selected, c.selections.size() - 1);
    }
 
    //drawEnergy(energy);
    first = false;
+ }
+ 
+ HashMap<String, Boolean> getSelected(int index)
+ {
+   HashMap<String, Boolean> selected = new HashMap<String, Boolean>();
+   Node cur;
+   Canvas newSelection = c.selections.get(index);
+   for (int i = 0; i < nodes.size(); i++) {
+     cur = nodes.get(i);
+     if (newSelection.covers(cur.x, cur.y)) {
+       selected.put(cur.getId(), true); 
+     }
+   } 
+   return selected;
  }
  
  HashMap<String, Boolean> getSelected()
@@ -234,8 +249,7 @@ public class NodeManager {
      curNode = nodeMap.get(curData.sourceIP);
      curEdge = curNode.edgeMap.get(curData.destIP);
      print("SOURCEIP: " + curData.sourceIP + ", DESTIP: " + curData.destIP + "\n");
-     if (curEdge == null) print("WHY IS THIS NULL\n");
-     if (curEdge.data.contains(curData)) {
+     if (curEdge != null && curEdge.data.contains(curData)) {
        curEdge.selected = true; 
      }
    }

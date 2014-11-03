@@ -42,7 +42,6 @@ public class Node {
    if (curEdge == null) {
      curEdge = new Edge(this, dest, c, data);
      edgeMap.put(dest.getId(), curEdge);
-     print("destID: " + dest.getId() + "\n");
      edges.add(curEdge);
    } else {
      curEdge.addNew(data); 
@@ -55,7 +54,7 @@ public class Node {
    if (mode == 0 && mouseOver()) {
      fill(255, 255, 0);
      selected = true;
-   } else if (mode == 1 && c.selections.size() > 0 && checkSelections()) {
+   } else if (mode != 1 && c.selections.size() > 0 && checkSelections()) {
      fill(255, 255, 0);
      selected = true;
    } else {

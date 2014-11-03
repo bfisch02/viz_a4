@@ -12,7 +12,8 @@ public class CategoricalView {
   String hover_name;
   String hover_value;
   boolean hovering;
-
+  boolean selecting;
+  
   public CategoricalView (Controller controller, Canvas canvas) {
     this.canvas = canvas;
     this.protocolStat = controller.getCategoryStat("protocol", false);
@@ -29,6 +30,7 @@ public class CategoricalView {
     this.hover_name = "";
     this.hover_value = "";
     this.hovering = false;
+    this.selecting = false;
   }
 
   void useSelected()
@@ -46,6 +48,10 @@ public class CategoricalView {
   }
 
   void update() {
+    if (mode != 0) {
+     drawSelections(); 
+    }
+    if (selectionMode == 2) selecting = true;
     this.hovering = false;
     this.mouseOverBar.set(0,null);
     this.mouseOverBar.set(1,null);
@@ -65,11 +71,14 @@ public class CategoricalView {
 
     //println("this.mouseOverBar: "+this.mouseOverBar);
     popMatrix();
+
     if (mode == 0 && !this.hovering && hover_name != "") {
        hover_name = "";
        hover_value = "";
-       print("Resetting\n");
        controller.setSelectedCategorical(selected);
+    } else if (mode_changed || mode != 0 && selecting && selection_made) {
+      controller.setSelectedCategorical(selected);
+      selecting = (selectionMode == 2);
     }
   }
 
@@ -102,14 +111,14 @@ public class CategoricalView {
 
       fill(c);
       float h_part = h_bar*(Integer)entry.getValue()/sum;
-
-      float tmpX = mouseX - screenX(0, 0);
-      float tmpY = mouseY - screenY(0, 0);
-      if (tmpX >= 0 && tmpX <= w_bar &&
-          tmpY >= 0 && tmpY <= h_part) {
-        this.mouseOverBar.set(0,title);
-        this.mouseOverBar.set(1,(String)entry.getKey());
-        if (mode == 0) {
+      
+      if (mode == 0) {
+        float tmpX = mouseX - screenX(0, 0);
+        float tmpY = mouseY - screenY(0, 0);
+        if (tmpX >= 0 && tmpX <= w_bar &&
+            tmpY >= 0 && tmpY <= h_part) {
+          this.mouseOverBar.set(0,title);
+          this.mouseOverBar.set(1,(String)entry.getKey());
           fill(255, 255, 0);
           this.hovering = true;
           ArrayList<String> l = new ArrayList<String>();
@@ -122,7 +131,26 @@ public class CategoricalView {
             controller.setSelectedCategorical(selected);
           }
         }
-        
+      } else if (mode == 1) {
+          float tmpX;
+          float tmpY;
+          Canvas cur;
+          for (int i = 0; i < canvas.selections.size(); i++) {
+            cur = canvas.selections.get(i);
+            tmpX = screenX(0, 0) + w_bar / 2;
+            tmpY = screenY(0, 0) + h_part / 2;
+            if (tmpX >= cur.x && tmpX < cur.x + cur.w && tmpY >= cur.y && tmpY <= cur.y + cur.h) {
+              fill(255, 255, 0);
+              ArrayList<String> l = selected.get(title);
+              if (l == null) {
+                l = new ArrayList<String>();
+              }
+              l.add((String)entry.getKey());
+              selected.put(title, l);
+              break; 
+            }
+          }
+          
       }
       rect(0, 0, w_bar, h_part);
       fill(255);

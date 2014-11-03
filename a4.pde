@@ -21,6 +21,7 @@ int selectionMode = -1;
 boolean mousedown = false;
 CategoricalView categoricalView;
 boolean selection_made = false;
+boolean mode_changed = false;
 
 void setup()
 {
@@ -54,6 +55,7 @@ void draw()
   // categorical_canvas.drawRect(150);
   drawMode();
   selection_made = false;
+  mode_changed = false;
 }
 
 void updateCanvases()
@@ -103,6 +105,7 @@ void mouseClicked()
 {
   if (settings_button.mouseOver()) {
     mode = (mode + 1) % 3; 
+    mode_changed = true;
   }
 }
 

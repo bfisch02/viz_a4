@@ -19,6 +19,7 @@ float selectionW;
 float selectionH;
 int selectionMode = -1;
 boolean mousedown = false;
+CategoricalView categoricalView;
 
 void setup()
 {
@@ -34,6 +35,8 @@ void setup()
    categorical_canvas = new Canvas(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
    temporal_canvas = new Canvas(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
    network_model = new NodeManager(controller, network_canvas);
+   categoricalView = new CategoricalView(controller, categorical_canvas);
+
 }
 
 void draw()
@@ -45,7 +48,9 @@ void draw()
   network_model.simulate(false, false);
   settings_canvas.drawRect(240);
   temporal_canvas.drawRect(230);
-  categorical_canvas.drawRect(220);
+  // categorical_canvas.drawRect(220);
+  categoricalView.update();
+  // categorical_canvas.drawRect(150);
   drawMode();
 }
 

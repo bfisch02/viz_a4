@@ -14,6 +14,7 @@ public class Node {
  float accelerationX;
  float accelerationY;
  boolean holding;
+ boolean selected;
  
  Node(String id, float mass, Canvas c)
  {
@@ -32,6 +33,7 @@ public class Node {
    this.holding = false;
    this.edgeMap = new HashMap<String, Edge>();
    this.edges = new ArrayList<Edge>();
+   this.selected = false;
  }
  
  void addEdge(Node dest)
@@ -50,9 +52,13 @@ public class Node {
  {
    fill(0, 0, 255);
    if (mode == 0 && mouseOver()) {
-     fill(255, 255, 0); 
+     fill(255, 255, 0);
+     selected = true;
    } else if (mode == 1 && c.selections.size() > 0 && checkSelections()) {
-     fill(255, 255, 0); 
+     fill(255, 255, 0);
+     selected = true;
+   } else {
+     selected = false; 
    }
    stroke(0);
    ellipse(c.x + x, c.y + y, radius * 20, radius * 20); 
@@ -108,20 +114,11 @@ public class Node {
     velocityY += accelerationY * t;
     x += velocityX * t;
     y += velocityY * t;
-    /*if (x < 0) {
-      x = 0;
-      velocityX = 0; 
-    } else if (x >= width) {
-      x = width - 1;
-      velocityX = 0; 
-    }
-    if (y < 0) {
-      y = 0;
-      velocityY = 0; 
-    } else if (y >= height) {
-      y = height - 1;
-      velocityY = 0; 
-    }*/
+ }
+ 
+ boolean isSelected()
+ {
+   return selected; 
  }
  
  String getId()

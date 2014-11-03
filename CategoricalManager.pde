@@ -10,13 +10,27 @@ public class CategoricalView {
 
   public CategoricalView (Controller controller, Canvas canvas) {
     this.canvas = canvas;
-    this.protocolStat = controller.getCategoryStat("protocol");
-    this.operationStat = controller.getCategoryStat("operation");
-    this.syslogStat = controller.getCategoryStat("syslog");
+    this.protocolStat = controller.getCategoryStat("protocol", false);
+    this.operationStat = controller.getCategoryStat("operation", false);
+    this.syslogStat = controller.getCategoryStat("syslog", false);
     colors = new IntList();
     colors.append((Integer) color(78,179,221));
     colors.append((Integer) color(168,221,181));
     colors.append((Integer) color(213,177,79));
+  }
+  
+  void useSelected()
+  {
+    this.protocolStat = controller.getCategoryStat("protocol", true);
+    this.operationStat = controller.getCategoryStat("operation", true);
+    this.syslogStat = controller.getCategoryStat("syslog", true);
+  }
+  
+  void useAll()
+  {
+    this.protocolStat = controller.getCategoryStat("protocol", false);
+    this.operationStat = controller.getCategoryStat("operation", false);
+    this.syslogStat = controller.getCategoryStat("syslog", false);
   }
 
   void update() {

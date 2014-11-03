@@ -20,6 +20,7 @@ float selectionH;
 int selectionMode = -1;
 boolean mousedown = false;
 CategoricalView categoricalView;
+boolean selection_made = false;
 
 void setup()
 {
@@ -52,6 +53,7 @@ void draw()
   categoricalView.update();
   // categorical_canvas.drawRect(150);
   drawMode();
+  selection_made = false;
 }
 
 void updateCanvases()
@@ -134,6 +136,7 @@ void mousePressed()
 void mouseReleased()
 {
   if (mode != 0 && selecting) {
+    selection_made = true;
     if (selectionMode == 0) {
       network_canvas.addSelection(selectionX, selectionY, selectionW, selectionH);
     } else if (selectionMode == 1) {
@@ -144,6 +147,7 @@ void mouseReleased()
   }
   selecting = false;
   mousedown = false;
+  
 }
 
 void mouseDragged()

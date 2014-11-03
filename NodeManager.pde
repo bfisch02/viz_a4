@@ -14,6 +14,7 @@ public class NodeManager {
  float NODE_SIZE = 7;
  int thickMin = 0;
  int thickMax = 0;
+ int num_selected = 0;
  
  Controller controller;
  ArrayList<Firewall> data;
@@ -98,8 +99,37 @@ public class NodeManager {
    }
    drawEdges();
    drawNodes();
+   HashMap<String, Boolean> selected = getSelected();
+   if (mode == 0) {
+     if (selected.size() > 0) {
+       controller.setSelectedNetwork(selected); 
+     } else {
+       controller.setAll(); 
+     }
+   } else if (mode == 1) {
+    if (selected.size() != num_selected || selectionMode == 0 && selection_made) {
+       num_selected = selected.size();
+       controller.setSelectedNetwork(selected);
+    }
+   } else if (mode == 2) {
+     
+   }
+
    //drawEnergy(energy);
    first = false;
+ }
+ 
+ HashMap<String, Boolean> getSelected()
+ {
+   HashMap<String, Boolean> selected = new HashMap<String, Boolean>();
+   Node cur;
+   for (int i = 0; i < nodes.size(); i++) {
+     cur = nodes.get(i);
+     if (cur.isSelected()) {
+       selected.put(cur.getId(), true); 
+     }
+   } 
+   return selected;
  }
  
  void drawSelections()

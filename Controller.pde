@@ -56,26 +56,32 @@ class Controller {
     categoricalView.useSelected();
   }
   
-  void setFilterCategorical(HashMap<String, ArrayList<String>> map)
+  void setFilterCategorical(HashMap<String, ArrayList<String>> map, int index)
   {
-    print("CALLED SET SELECTED CATEGORICAL..\n");
+    if (index == 0)
+    {
+      setSelectedCategorical(map); 
+      return;
+    }
+    print("CALLED SET FILTER CATEGORICAL..\n");
     String cur_spec;
     Firewall cur_data;
-    selected_data = new ArrayList<Firewall>();
+    new_selected = new ArrayList<Firewall>();
     ArrayList<String> operationList;
     ArrayList<String> syslogList;
     ArrayList<String> protocolList;
-    for (int i = 0; i < full_data.size(); i++) {
-       cur_data = full_data.get(i);
+    for (int i = 0; i < selected_data.size(); i++) {
+       cur_data = selected_data.get(i);
        operationList = map.get("Operation");
        syslogList = map.get("Syslog priority");
        protocolList = map.get("Protocol");
        if (operationList != null && operationList.contains(cur_data.operation) ||
            syslogList != null && syslogList.contains(cur_data.syslog) ||
            protocolList != null && protocolList.contains(cur_data.protocol)) {
-         selected_data.add(cur_data);
+         new_selected.add(cur_data);
        }
     }
+    selected_data = new_selected;
     network_model.highlightSelectedEdges();
   }
   

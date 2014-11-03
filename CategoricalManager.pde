@@ -76,9 +76,11 @@ public class CategoricalView {
        hover_name = "";
        hover_value = "";
        controller.setSelectedCategorical(selected);
-    } else if (mode_changed || mode != 0 && selecting && selection_made) {
+    } else if (mode_changed || mode == 1 && selecting && selection_made) {
       controller.setSelectedCategorical(selected);
       selecting = (selectionMode == 2);
+    } else if (mode == 2 && selectionMode == 2 && selection_made) {
+      controller.setFilterCategorical(selected);
     }
   }
 
@@ -131,11 +133,12 @@ public class CategoricalView {
             controller.setSelectedCategorical(selected);
           }
         }
-      } else if (mode == 1) {
+      } else {
           float tmpX;
           float tmpY;
           Canvas cur;
           for (int i = 0; i < canvas.selections.size(); i++) {
+            if (mode == 2 && i != canvas.selections.size() - 1) continue;
             cur = canvas.selections.get(i);
             tmpX = screenX(0, 0) + w_bar / 2;
             tmpY = screenY(0, 0) + h_part / 2;

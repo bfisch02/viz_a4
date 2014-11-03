@@ -42,7 +42,7 @@ void setup()
 
 void draw()
 {
-  background(255);
+  //background(255);
   updateCanvases();
   handleSelection();
 
@@ -64,6 +64,11 @@ void updateCanvases()
                          settings_canvas.w / 2, settings_canvas.h / 2);
   categorical_canvas.update(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
   temporal_canvas.update(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
+  network_canvas.drawRect(255);
+  settings_canvas.drawRect(255);
+  categorical_canvas.drawRect(255);
+  temporal_canvas.drawRect(255);
+  
 }
 
 void drawMode()

@@ -135,7 +135,7 @@ public class NodeManager {
  void drawSelections()
  {
    for (int i = 0; i < c.selections.size(); i++) {
-     c.selections.get(i).drawRect(0);
+     c.selections.get(i).drawRect(100);
    } 
  }
  

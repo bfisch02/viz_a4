@@ -67,7 +67,6 @@ public class Node {
  
  boolean checkSelections()
  {
-   print("c.x + x and c.y + y: " + (c.x + x));
    Canvas cur;
    for (int i = 0; i < c.selections.size(); i++) {
      cur = c.selections.get(i);

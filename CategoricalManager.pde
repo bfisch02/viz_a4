@@ -34,11 +34,12 @@ public class CategoricalView {
   }
 
   void update() {
+    drawSelections();
     pushMatrix();
     translate(this.canvas.x, this.canvas.y);
     fill(255);
     stroke(0);
-    rect(0, 0, this.canvas.w, this.canvas.h);
+    //rect(0, 0, this.canvas.w, this.canvas.h);
     fill(10);
     translate(this.canvas.w*0.05, 0);
     drawStat(operationStat, this.canvas.w*0.3, this.canvas.h, "Operation");
@@ -46,8 +47,16 @@ public class CategoricalView {
     drawStat(syslogStat, this.canvas.w*0.3, this.canvas.h, "Syslog priority");
     translate(this.canvas.w*0.3, 0);
     drawStat(protocolStat, this.canvas.w*0.3, this.canvas.h, "Protocol");
+
     popMatrix();
   }
+
+ void drawSelections()
+ {
+   for (int i = 0; i < canvas.selections.size(); i++) {
+     canvas.selections.get(i).drawRect(100);
+   } 
+ }
 
   void drawStat(HashMap<String,Integer> stat, float w, float h, String title) {
     pushMatrix();
@@ -71,6 +80,7 @@ public class CategoricalView {
 
       fill(c);
       float h_part = h_bar*(Integer)entry.getValue()/sum;
+
       rect(0, 0, w_bar, h_part);
       
       fill(255);

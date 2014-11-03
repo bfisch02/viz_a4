@@ -6,6 +6,7 @@ public class CategoricalView {
   HashMap<String,Integer> operationStat;
   HashMap<String,Integer> syslogStat;
   IntList colors;
+  StringList mouseOverBar;
 
 
   public CategoricalView (Controller controller, Canvas canvas) {
@@ -17,15 +18,18 @@ public class CategoricalView {
     colors.append((Integer) color(78,179,221));
     colors.append((Integer) color(168,221,181));
     colors.append((Integer) color(213,177,79));
+    this.mouseOverBar = new StringList();
+    this.mouseOverBar.append("null");
+    this.mouseOverBar.append("null");
   }
-  
+
   void useSelected()
   {
     this.protocolStat = controller.getCategoryStat("protocol", true);
     this.operationStat = controller.getCategoryStat("operation", true);
     this.syslogStat = controller.getCategoryStat("syslog", true);
   }
-  
+
   void useAll()
   {
     this.protocolStat = controller.getCategoryStat("protocol", false);
@@ -34,7 +38,8 @@ public class CategoricalView {
   }
 
   void update() {
-    drawSelections();
+    this.mouseOverBar.set(0,null);
+    this.mouseOverBar.set(1,null);
     pushMatrix();
     translate(this.canvas.x, this.canvas.y);
     fill(255);
@@ -48,6 +53,7 @@ public class CategoricalView {
     translate(this.canvas.w*0.3, 0);
     drawStat(protocolStat, this.canvas.w*0.3, this.canvas.h, "Protocol");
 
+    println("this.mouseOverBar: "+this.mouseOverBar);
     popMatrix();
   }
 
@@ -73,7 +79,7 @@ public class CategoricalView {
     for (int i : stat.values()) {
       sum += i;
     }
-    
+
     for (Map.Entry entry : stat.entrySet()) {
       color c = col.get(0);
       col.remove(0);
@@ -82,7 +88,14 @@ public class CategoricalView {
       float h_part = h_bar*(Integer)entry.getValue()/sum;
 
       rect(0, 0, w_bar, h_part);
-      
+      float tmpX = mouseX - screenX(0, 0);
+      float tmpY = mouseY - screenY(0, 0);
+      if (tmpX >= 0 && tmpX <= w_bar &&
+          tmpY >= 0 && tmpY <= h_part) {
+        this.mouseOverBar.set(0,title);
+        this.mouseOverBar.set(1,(String)entry.getKey());
+      }
+
       fill(255);
       text((String)entry.getKey(), w_bar/2, min(12.0, h_part));
 
@@ -92,6 +105,6 @@ public class CategoricalView {
     popMatrix();
   }
 
-  
+
 }
-  
+

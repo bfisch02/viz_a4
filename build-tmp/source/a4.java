@@ -39,6 +39,7 @@ float selectionH;
 int selectionMode = -1;
 boolean mousedown = false;
 CategoricalView categoricalView;
+boolean selection_made = false;
 
 public void setup()
 {
@@ -62,7 +63,7 @@ public void draw()
 {
   background(255);
   updateCanvases();
-    handleSelection();
+  handleSelection();
 
   network_model.simulate(false, false);
   settings_canvas.drawRect(240);
@@ -71,6 +72,7 @@ public void draw()
   categoricalView.update();
   // categorical_canvas.drawRect(150);
   drawMode();
+  selection_made = false;
 }
 
 public void updateCanvases()
@@ -126,13 +128,22 @@ public void mousePressed()
   if (mode != 0) {
     if (network_canvas.mouseOver()) {
       selectionMode = 0; 
+      temporal_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     } else if (temporal_canvas.mouseOver()) {
       selectionMode = 1; 
+      network_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     } else if (categorical_canvas.mouseOver()) {
       selectionMode = 2; 
+      network_canvas.clearSelections();
+      temporal_canvas.clearSelections();
     } else {
       selectionMode = -1; 
       selecting = false;
+      network_canvas.clearSelections();
+      temporal_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     }
     selectionX = mouseX;
     selectionY = mouseY;
@@ -144,6 +155,7 @@ public void mousePressed()
 public void mouseReleased()
 {
   if (mode != 0 && selecting) {
+    selection_made = true;
     if (selectionMode == 0) {
       network_canvas.addSelection(selectionX, selectionY, selectionW, selectionH);
     } else if (selectionMode == 1) {
@@ -154,6 +166,7 @@ public void mouseReleased()
   }
   selecting = false;
   mousedown = false;
+  
 }
 
 public void mouseDragged()
@@ -198,8 +211,21 @@ public class Canvas {
   
   public void addSelection(float x, float y, float w, float h)
   {
+    if (w < 0) {
+      x += w;
+      w *= -1; 
+    }
+    if (h < 0) {
+      y += h;
+      h *= -1; 
+    }
     selections.add(new Canvas(x, y, w, h));
     print("ADDED SELECTION\n");
+  }
+  
+  public void clearSelections()
+  {
+    selections = new ArrayList<Canvas>(); 
   }
   
   public void drawSelections()
@@ -235,7 +261,12 @@ public class Canvas {
   
   public boolean mouseOver()
   {
-    return (mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h); 
+    return covers(mouseX, mouseY); 
+  }
+  
+  public boolean covers(float px, float py)
+  {
+    return (px > x && px < x + w && py > y && py < y + h);
   }
 }
 
@@ -246,20 +277,40 @@ public class CategoricalView {
   HashMap<String,Integer> operationStat;
   HashMap<String,Integer> syslogStat;
   IntList colors;
+  StringList mouseOverBar;
 
 
   public CategoricalView (Controller controller, Canvas canvas) {
     this.canvas = canvas;
-    this.protocolStat = controller.getCategoryStat("protocol");
-    this.operationStat = controller.getCategoryStat("operation");
-    this.syslogStat = controller.getCategoryStat("syslog");
+    this.protocolStat = controller.getCategoryStat("protocol", false);
+    this.operationStat = controller.getCategoryStat("operation", false);
+    this.syslogStat = controller.getCategoryStat("syslog", false);
     colors = new IntList();
     colors.append((Integer) color(78,179,221));
     colors.append((Integer) color(168,221,181));
     colors.append((Integer) color(213,177,79));
+    this.mouseOverBar = new StringList();
+    this.mouseOverBar.append("null");
+    this.mouseOverBar.append("null");
+  }
+
+  public void useSelected()
+  {
+    this.protocolStat = controller.getCategoryStat("protocol", true);
+    this.operationStat = controller.getCategoryStat("operation", true);
+    this.syslogStat = controller.getCategoryStat("syslog", true);
+  }
+
+  public void useAll()
+  {
+    this.protocolStat = controller.getCategoryStat("protocol", false);
+    this.operationStat = controller.getCategoryStat("operation", false);
+    this.syslogStat = controller.getCategoryStat("syslog", false);
   }
 
   public void update() {
+    this.mouseOverBar.set(0,null);
+    this.mouseOverBar.set(1,null);
     pushMatrix();
     translate(this.canvas.x, this.canvas.y);
     fill(255);
@@ -272,6 +323,7 @@ public class CategoricalView {
     drawStat(syslogStat, this.canvas.w*0.3f, this.canvas.h, "Syslog priority");
     translate(this.canvas.w*0.3f, 0);
     drawStat(protocolStat, this.canvas.w*0.3f, this.canvas.h, "Protocol");
+    println("this.mouseOverBar: "+this.mouseOverBar);
     popMatrix();
   }
 
@@ -290,7 +342,7 @@ public class CategoricalView {
     for (int i : stat.values()) {
       sum += i;
     }
-    
+
     for (Map.Entry entry : stat.entrySet()) {
       int c = col.get(0);
       col.remove(0);
@@ -298,7 +350,14 @@ public class CategoricalView {
       fill(c);
       float h_part = h_bar*(Integer)entry.getValue()/sum;
       rect(0, 0, w_bar, h_part);
-      
+      float tmpX = mouseX - screenX(0, 0);
+      float tmpY = mouseY - screenY(0, 0);
+      if (tmpX >= 0 && tmpX <= w_bar &&
+          tmpY >= 0 && tmpY <= h_part) {
+        this.mouseOverBar.set(0,title);
+        this.mouseOverBar.set(1,(String)entry.getKey());
+      }
+
       fill(255);
       text((String)entry.getKey(), w_bar/2, min(12.0f, h_part));
 
@@ -308,9 +367,9 @@ public class CategoricalView {
     popMatrix();
   }
 
-  
+
 }
-  
+
 
 
 class Controller {
@@ -332,12 +391,14 @@ class Controller {
     return selected_data; 
   }
 
-  public HashMap<String,Integer> getCategoryStat(String category) {
-    ArrayList<Firewall> allData = this.getAllData();
+  public HashMap<String,Integer> getCategoryStat(String category, boolean selected) {
+    ArrayList<Firewall> d;
+    if (selected) d = this.getSelectedData();
+    else d = this.getAllData();
     HashMap<String,Integer> categoryCnt = new HashMap<String,Integer>();
 
 
-    for (Firewall f : allData) {
+    for (Firewall f : d) {
       try {
         Field field = f.getClass().getDeclaredField(category);
         field.setAccessible(true);
@@ -359,6 +420,29 @@ class Controller {
     // println(category + " - categoryCnt: "+categoryCnt);
 
     return categoryCnt;
+  }
+  
+  public void setAll()
+  {
+    selected_data = full_data;
+    categoricalView.useSelected();
+  }
+  
+  public void setSelectedNetwork(HashMap<String, Boolean> ips)
+  {
+    String cur_ip;
+    Firewall cur_data;
+    selected_data = new ArrayList<Firewall>();
+    for (int i = 0; i < full_data.size(); i++) {
+       cur_data = full_data.get(i);
+       if (ips.get(cur_data.sourceIP) != null || ips.get(cur_data.destIP) != null) {
+         selected_data.add(cur_data); 
+       }
+    }
+    if (selected_data.size() == 0) {
+      setAll(); 
+    }
+    categoricalView.useSelected();
   }
   
 }
@@ -454,6 +538,7 @@ public class Node {
  float accelerationX;
  float accelerationY;
  boolean holding;
+ boolean selected;
  
  Node(String id, float mass, Canvas c)
  {
@@ -472,6 +557,7 @@ public class Node {
    this.holding = false;
    this.edgeMap = new HashMap<String, Edge>();
    this.edges = new ArrayList<Edge>();
+   this.selected = false;
  }
  
  public void addEdge(Node dest)
@@ -489,12 +575,32 @@ public class Node {
  public void drawNode()
  {
    fill(0, 0, 255);
-   if (mouseOver()) {
-     fill(0, 0, 0); 
+   if (mode == 0 && mouseOver()) {
+     fill(255, 255, 0);
+     selected = true;
+   } else if (mode == 1 && c.selections.size() > 0 && checkSelections()) {
+     fill(255, 255, 0);
+     selected = true;
+   } else {
+     selected = false; 
    }
    stroke(0);
    ellipse(c.x + x, c.y + y, radius * 20, radius * 20); 
    textAlign(CENTER);
+ }
+ 
+ public boolean checkSelections()
+ {
+   print("c.x + x and c.y + y: " + (c.x + x));
+   Canvas cur;
+   for (int i = 0; i < c.selections.size(); i++) {
+     cur = c.selections.get(i);
+     
+     if (cur.covers(c.x + x, c.y + y)) {
+       return true; 
+     }
+   } 
+   return false;
  }
  
  public void drawNodeName()
@@ -532,20 +638,11 @@ public class Node {
     velocityY += accelerationY * t;
     x += velocityX * t;
     y += velocityY * t;
-    /*if (x < 0) {
-      x = 0;
-      velocityX = 0; 
-    } else if (x >= width) {
-      x = width - 1;
-      velocityX = 0; 
-    }
-    if (y < 0) {
-      y = 0;
-      velocityY = 0; 
-    } else if (y >= height) {
-      y = height - 1;
-      velocityY = 0; 
-    }*/
+ }
+ 
+ public boolean isSelected()
+ {
+   return selected; 
  }
  
  public String getId()
@@ -624,6 +721,7 @@ public class NodeManager {
  float NODE_SIZE = 7;
  int thickMin = 0;
  int thickMax = 0;
+ int num_selected = 0;
  
  Controller controller;
  ArrayList<Firewall> data;
@@ -692,6 +790,9 @@ public class NodeManager {
 
  public void simulate(boolean pressed, boolean dragged)
  {
+   if (mode != 0) {
+     drawSelections(); 
+   }
    float energy = getEnergy();
    boolean dim_changed = false;
    if (width != prev_width || height != prev_height) {
@@ -705,8 +806,44 @@ public class NodeManager {
    }
    drawEdges();
    drawNodes();
+   HashMap<String, Boolean> selected = getSelected();
+   if (mode == 0) {
+     if (selected.size() > 0) {
+       controller.setSelectedNetwork(selected); 
+     } else {
+       controller.setAll(); 
+     }
+   } else if (mode == 1) {
+    if (selected.size() != num_selected || selectionMode == 0 && selection_made) {
+       num_selected = selected.size();
+       controller.setSelectedNetwork(selected);
+    }
+   } else if (mode == 2) {
+     
+   }
+
    //drawEnergy(energy);
    first = false;
+ }
+ 
+ public HashMap<String, Boolean> getSelected()
+ {
+   HashMap<String, Boolean> selected = new HashMap<String, Boolean>();
+   Node cur;
+   for (int i = 0; i < nodes.size(); i++) {
+     cur = nodes.get(i);
+     if (cur.isSelected()) {
+       selected.put(cur.getId(), true); 
+     }
+   } 
+   return selected;
+ }
+ 
+ public void drawSelections()
+ {
+   for (int i = 0; i < c.selections.size(); i++) {
+     c.selections.get(i).drawRect(0);
+   } 
  }
  
  public boolean initialize_nodes(boolean pressed, boolean dragged)

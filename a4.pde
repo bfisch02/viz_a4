@@ -31,8 +31,8 @@ void setup()
    settings_canvas = new Canvas(W_SPLIT * width, 0, (1 - W_SPLIT) * width, H_SPLIT1 * height);
    settings_button = new Canvas(settings_canvas.x + settings_canvas.w / 4, settings_canvas.y + settings_canvas.h / 4,
                                 settings_canvas.w / 2, settings_canvas.h / 2);
-   temporal_canvas = new Canvas(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
-   categorical_canvas = new Canvas(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
+   categorical_canvas = new Canvas(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
+   temporal_canvas = new Canvas(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
    network_model = new NodeManager(controller, network_canvas);
 }
 
@@ -40,7 +40,7 @@ void draw()
 {
   background(255);
   updateCanvases();
-    handleSelection();
+  handleSelection();
 
   network_model.simulate(false, false);
   settings_canvas.drawRect(240);
@@ -55,8 +55,8 @@ void updateCanvases()
   settings_canvas.update(W_SPLIT * width, 0, (1 - W_SPLIT) * width, H_SPLIT1 * height);
   settings_button.update(settings_canvas.x + settings_canvas.w / 4, settings_canvas.y + settings_canvas.h / 4,
                          settings_canvas.w / 2, settings_canvas.h / 2);
-  temporal_canvas.update(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
-  categorical_canvas.update(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
+  categorical_canvas.update(W_SPLIT * width, H_SPLIT1 * height, (1 - W_SPLIT) * width, H_SPLIT2 * height);
+  temporal_canvas.update(0, (H_SPLIT1 + H_SPLIT2) * height, width, (1 - (H_SPLIT1 + H_SPLIT2)) * height);
 }
 
 void drawMode()
@@ -102,13 +102,22 @@ void mousePressed()
   if (mode != 0) {
     if (network_canvas.mouseOver()) {
       selectionMode = 0; 
+      temporal_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     } else if (temporal_canvas.mouseOver()) {
       selectionMode = 1; 
+      network_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     } else if (categorical_canvas.mouseOver()) {
       selectionMode = 2; 
+      network_canvas.clearSelections();
+      temporal_canvas.clearSelections();
     } else {
       selectionMode = -1; 
       selecting = false;
+      network_canvas.clearSelections();
+      temporal_canvas.clearSelections();
+      categorical_canvas.clearSelections();
     }
     selectionX = mouseX;
     selectionY = mouseY;

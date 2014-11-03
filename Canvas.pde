@@ -19,6 +19,11 @@ public class Canvas {
     print("ADDED SELECTION\n");
   }
   
+  void clearSelections()
+  {
+    selections = new ArrayList<Canvas>(); 
+  }
+  
   void drawSelections()
   {
     stroke(0, 255, 0);
@@ -52,6 +57,11 @@ public class Canvas {
   
   boolean mouseOver()
   {
-    return (mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h); 
+    return covers(mouseX, mouseY); 
+  }
+  
+  boolean covers(float px, float py)
+  {
+    return (px > x && px < x + w && py > y && py < y + h);
   }
 }

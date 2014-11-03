@@ -49,12 +49,28 @@ public class Node {
  void drawNode()
  {
    fill(0, 0, 255);
-   if (mouseOver()) {
-     fill(0, 0, 0); 
+   if (mode == 0 && mouseOver()) {
+     fill(255, 255, 0); 
+   } else if (mode == 1 && c.selections.size() > 0 && checkSelections()) {
+     fill(255, 255, 0); 
    }
    stroke(0);
    ellipse(c.x + x, c.y + y, radius * 20, radius * 20); 
    textAlign(CENTER);
+ }
+ 
+ boolean checkSelections()
+ {
+   print("c.x + x and c.y + y: " + (c.x + x));
+   Canvas cur;
+   for (int i = 0; i < c.selections.size(); i++) {
+     cur = c.selections.get(i);
+     
+     if (cur.covers(c.x + x, c.y + y)) {
+       return true; 
+     }
+   } 
+   return false;
  }
  
  void drawNodeName()

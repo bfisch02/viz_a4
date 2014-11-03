@@ -82,6 +82,9 @@ public class NodeManager {
 
  void simulate(boolean pressed, boolean dragged)
  {
+   if (mode != 0) {
+     drawSelections(); 
+   }
    float energy = getEnergy();
    boolean dim_changed = false;
    if (width != prev_width || height != prev_height) {
@@ -97,6 +100,13 @@ public class NodeManager {
    drawNodes();
    //drawEnergy(energy);
    first = false;
+ }
+ 
+ void drawSelections()
+ {
+   for (int i = 0; i < c.selections.size(); i++) {
+     c.selections.get(i).drawRect(0);
+   } 
  }
  
  boolean initialize_nodes(boolean pressed, boolean dragged)

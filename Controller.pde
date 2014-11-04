@@ -53,7 +53,9 @@ class Controller {
   void setAll()
   {
     selected_data = full_data;
+    network_model.unhighlightEdges();
     categoricalView.useSelected();
+    temporal_model.useSelected();
   }
   
   void setFilterCategorical(HashMap<String, ArrayList<String>> map, int index)
@@ -83,6 +85,7 @@ class Controller {
     }
     selected_data = new_selected;
     network_model.highlightSelectedEdges();
+    temporal_model.useSelected();
   }
   
   void setSelectedCategorical(HashMap<String, ArrayList<String>> map)
@@ -106,6 +109,26 @@ class Controller {
        }
     }
     network_model.highlightSelectedEdges();
+    temporal_model.useSelected();
+  }
+  
+  void setSelectedTemporal(HashMap<String, ArrayList<String>> map)
+  {
+    print("CALLED SET SELECTED Temporal..\n");
+    String cur_spec;
+    Firewall cur_data;
+    selected_data = new ArrayList<Firewall>();
+    ArrayList<String> cur_ports;
+    for (int i = 0; i < full_data.size(); i++) {
+       cur_data = full_data.get(i);
+       cur_ports = map.get(cur_data.time);
+       if (cur_ports != null && cur_ports.contains(cur_data.destPort)) {
+         selected_data.add(cur_data);
+       }
+    }
+    print("SELECTED SIZE: " + selected_data.size() + "\n");
+    network_model.highlightSelectedEdges();
+    categoricalView.useSelected();
   }
   
   void setFilterNetwork(HashMap<String, Boolean> ips, int index)
@@ -125,6 +148,7 @@ class Controller {
       }
       selected_data = newSelected; 
       categoricalView.useSelected();
+      temporal_model.useSelected();
     }
   }
   
@@ -139,10 +163,9 @@ class Controller {
          selected_data.add(cur_data); 
        }
     }
-    if (selected_data.size() == 0) {
-      setAll(); 
-    }
+    print("Size of selected data: " + selected_data.size() + "\n");
     categoricalView.useSelected();
+    temporal_model.useSelected();
   }
   
 }

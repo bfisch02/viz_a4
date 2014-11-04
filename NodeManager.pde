@@ -104,18 +104,26 @@ public class NodeManager {
    HashMap<String, Boolean> selected = getSelected();
    if (mode == 0) {
      if (selected.size() > 0) {
+       num_selected = 1;
        controller.setSelectedNetwork(selected); 
-     } else {
+     } else if (num_selected != 0) {
+       num_selected = 0;
        controller.setAll(); 
      }
    } else if (mode == 1) {
     if (selected.size() != num_selected || selectionMode == 0 && selection_made) {
        num_selected = selected.size();
-       controller.setSelectedNetwork(selected);
+       if (c.selections.size() == 0) controller.setAll();
+       else controller.setSelectedNetwork(selected);
     }
-   } else if (mode == 2 && selectionMode == 0 && selection_made) {
-     selected = getSelected(c.selections.size() - 1);
-     controller.setFilterNetwork(selected, c.selections.size() - 1);
+   } else if (selected.size() != num_selected || mode == 2 && selectionMode == 0 && selection_made) {
+     num_selected = selected.size();
+     if (num_selected == 0) {
+       controller.setAll();
+     } else {
+       selected = getSelected(c.selections.size() - 1);
+       controller.setFilterNetwork(selected, c.selections.size() - 1);
+     }
    }
 
    //drawEnergy(energy);
@@ -248,7 +256,6 @@ public class NodeManager {
      curData = controller.getSelectedData().get(i);
      curNode = nodeMap.get(curData.sourceIP);
      curEdge = curNode.edgeMap.get(curData.destIP);
-     print("SOURCEIP: " + curData.sourceIP + ", DESTIP: " + curData.destIP + "\n");
      if (curEdge != null && curEdge.data.contains(curData)) {
        curEdge.selected = true; 
      }

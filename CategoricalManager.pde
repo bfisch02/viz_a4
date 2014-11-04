@@ -71,13 +71,16 @@ public class CategoricalView {
 
     //println("this.mouseOverBar: "+this.mouseOverBar);
     popMatrix();
-
-    if (mode == 0 && !this.hovering && hover_name != "") {
+    if (mode_changed) {
+      controller.setAll(); 
+    } else if (mode == 0 && !this.hovering && hover_name != "") {
        hover_name = "";
        hover_value = "";
-       controller.setSelectedCategorical(selected);
-    } else if (mode_changed || mode == 1 && selecting && selection_made) {
-      controller.setSelectedCategorical(selected);
+       controller.setAll();
+    } else if (mode == 1 && (selectionMode == 2 || selecting && selection_made)) {
+      this.useAll();
+      if (canvas.selections.size() == 0) controller.setAll();
+      else controller.setSelectedCategorical(selected);
       selecting = (selectionMode == 2);
     } else if (mode == 2 && selectionMode == 2 && selection_made) {
       controller.setFilterCategorical(selected, canvas.selections.size() - 1);
@@ -139,12 +142,13 @@ public class CategoricalView {
           float tmpY;
           Canvas cur;
           for (int i = 0; i < canvas.selections.size(); i++) {
-            if (mode == 2 && i != canvas.selections.size() - 1) continue;
             cur = canvas.selections.get(i);
             tmpX = screenX(0, 0) + w_bar / 2;
             tmpY = screenY(0, 0) + h_part / 2;
             if (tmpX >= cur.x && tmpX < cur.x + cur.w && tmpY >= cur.y && tmpY <= cur.y + cur.h) {
               fill(255, 255, 0);
+              if (mode == 2 && i != canvas.selections.size() - 1)
+                continue;
               ArrayList<String> l = selected.get(title);
               if (l == null) {
                 l = new ArrayList<String>();

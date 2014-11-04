@@ -5,12 +5,15 @@ public class TemporalManager {
  Canvas c;
  ArrayList<RectNode> rects;
  HashMap<String, RectNode> RectMap;
- ArrayList<String> SP;
- HashMap<String,Integer> SPMap;
+ ArrayList<String> DP;
+ HashMap<String,Integer> DPMap;
  ArrayList<String> time;
  HashMap<String,Integer> timeMap;
- int num_SP,num_time;
+ int num_DP,num_time;
  int Max_Freq;
+ HashMap<String, ArrayList<String>> selected;
+ boolean hovers;
+ boolean selecting;
  
 
  
@@ -19,15 +22,24 @@ public class TemporalManager {
  
  TemporalManager(Controller controller, Canvas c)
  {
+   print("Initializing!\n");
    this.c = c;
    this.controller = controller;
+   Max_Freq = -1;
    initializeData(controller.getAllData());
-   Max_Freq = 1;
+   selected = new HashMap<String, ArrayList<String>>();
+   this.hovers = false;
+   this.selecting = false;
  } 
  
+ void useSelected()
+ {
+   initializeData(controller.getSelectedData()); 
+ }
 
  void initializeData(ArrayList<Firewall> d) {
- 
+   //print("CALLED INITIALIZE, data size = " + d.size() + "\n");
+   this.Max_Freq = -1;
    this.data = d;
    rects = new ArrayList<RectNode>();
    RectMap = new HashMap<String, RectNode>();  
@@ -35,9 +47,9 @@ public class TemporalManager {
    RectNode cur_rect;
    for (int i = 0; i < this.data.size(); i++) {
      cur = this.data.get(i);
-     cur_rect = RectMap.get(cur.sourcePort+","+cur.time);
+     cur_rect = RectMap.get(cur.destPort+","+cur.time);
      if(cur_rect == null) {
-       cur_rect = new RectNode(cur.sourcePort, cur.time, c);
+       cur_rect = new RectNode(cur.destPort, cur.time, c);
        rects.add(cur_rect);
        RectMap.put(cur_rect.get_ID(), cur_rect);
      }
@@ -54,23 +66,23 @@ public class TemporalManager {
    }
    
   
-   //get sourceports into SP arraylist
+   //get destPorts into DP arraylist
    Integer freq;
-   SP = new ArrayList<String>();
-   SPMap = new HashMap<String,Integer>();
+   DP = new ArrayList<String>();
+   DPMap = new HashMap<String,Integer>();
    for(int i=0; i< this.data.size(); i++){
      cur = this.data.get(i);
-     freq = SPMap.get(cur.sourcePort);
+     freq = DPMap.get(cur.destPort);
      if(freq == null){
-       SP.add(cur.sourcePort);
-       SPMap.put(cur.sourcePort,1);
+       DP.add(cur.destPort);
+       DPMap.put(cur.destPort,1);
      }
    }
    
    
 
    
-      Collections.sort(SP, new Comparator<String>() {
+      Collections.sort(DP, new Comparator<String>() {
         @Override
         public int compare(String s1, String s2)
         {
@@ -80,19 +92,19 @@ public class TemporalManager {
         }
     });
  
-   for(String x:SP){
+   for(String x:DP){
      
      
    }
    
-  num_SP = SP.size();
+  num_DP = DP.size();
 //get times into time arraylist
 
    time = new ArrayList<String>();
    timeMap = new HashMap<String,Integer>();
    for(int i=0; i< this.data.size(); i++){
      cur = this.data.get(i);
-     freq = SPMap.get(cur.time);
+     freq = DPMap.get(cur.time);
      if(freq == null){
        timeMap.put(cur.time,1);
      }
@@ -126,30 +138,65 @@ public class TemporalManager {
 
  }
 
+void drawSelections()
+ {
+   for (int i = 0; i < c.selections.size(); i++) {
+     c.selections.get(i).drawRect(100);
+   } 
+ }
+
 void drawRects()
 {
-  int snum=SP.size();
-  int tnum=0;
-  for(String s: SP){
-    snum-=1;
-    tnum = time.size();
-    for(String t: time){
-      tnum-=1;
-      RectNode temp = RectMap.get(s+","+t);
-      if(temp!= null){
-        temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);   
-      }
-    else{
-      temp = new RectNode(s,t,c);
-      temp.drawRect(snum,tnum,num_SP,num_time,Max_Freq);
-    }
+  selected = new HashMap<String, ArrayList<String>>();
   
-  } 
+  boolean hovering;
+  boolean keep_hovering = false;
+  int snum=DP.size();
+  int tnum=0;
+  for(String s: DP){
+    snum-=1;
+    tnum = 0;
+    for(String t: time){
+      RectNode temp = RectMap.get(s+","+t);
+      if(temp == null){
+        temp = new RectNode(s, t, c);
 
- }
+      }
+      hovering = temp.drawRect(snum,tnum,num_DP,num_time,Max_Freq);
+      if (hovering) {
+
+         ArrayList<String> l = selected.get(t);
+         if (l == null) {
+           l = new ArrayList<String>(); 
+         }
+         l.add(s);
+         selected.put(t, l);
+         if (mode == 0) {
+           keep_hovering = true;
+           this.hovers = true;
+           controller.setSelectedTemporal(selected);
+         }
+      } 
+      tnum+=1;
+  
+    } 
+  }
+  if (mode == 0 && this.hovers && keep_hovering == false) {
+    this.hovers = false;
+    controller.setAll(); 
+  } else if (mode == 1) {
+    if (selectionMode == 1 && selection_made) {
+      controller.setSelectedTemporal(selected);
+      selecting = true;
+    } else if (selecting && c.selections.size() == 0) {
+      print("HERE!\n");
+      selecting = false;
+      controller.setAll(); 
+    }
+  }
 }
-int get_num_SP(){
-  return num_SP;
+int get_num_DP(){
+  return num_DP;
 }
 
 int get_num_time(){
@@ -157,15 +204,21 @@ int get_num_time(){
 }
 
 void drawTable(){
-
+  
+  if (mode_changed) {
+    initializeData(controller.getAllData()); 
+  }
+  if (mode != 0) {
+   drawSelections(); 
+  }
    int i=0;
-   for(String s: SP){
-//   for(int i=0; i<num_SP; i++){
+   for(String s: DP){
+//   for(int i=0; i<num_DP; i++){
    fill(220,220,220);
-   rect(c.x, c.y + c.h / 15 +(i*c.h / 27), c.w / 20, c.h / 27); // 40 to 50
+   rect(c.x, c.y + c.h / 15 +(i*c.h / 15), c.w / 20, c.h / 15); // 40 to 50
    fill(0,0,0);
    textSize(c.w / 150);
-   text(s,c.x + c.w/40,c.y+c.h / 15 +((i+1)*c.h / 27 - 3));
+   text(s,c.x + c.w/40,c.y+c.h / 15 +((i+1)*c.h / 15 - 3));
    i++;
    }
    i=0;
@@ -173,10 +226,10 @@ void drawTable(){
 for(String t: time){
 //   for(int i=0; i<num_time; i++){
      fill(220,220,220);
-     rect(c.x+ c.w / 20 + i*(c.w / 34),c.y+c.h / 15+((num_SP) * c.h / 27),c.w / 34, c.h / 27);// 30 to 40
+     rect(c.x+ c.w / 20 + i*(c.w / 34),c.y+c.h / 15+((num_DP) * c.h / 15),c.w / 34, c.h / 15);// 30 to 40
      fill(0,0,0);
      textSize(c.w / 150);
-     text(t,c.x+ c.w / 20 + i*(c.w / 34) + c.w/68, c.y+c.h / 15+((num_SP) * c.h / 27 + c.h / 54 + 2));
+     text(t,c.x+ c.w / 20 + i*(c.w / 34) + c.w/68, c.y+c.h / 15+((num_DP) * c.h / 15 + c.h / 30 + 2));
      
      
      i++;
